@@ -4,8 +4,35 @@
 
 This project analyzes factors influencing furniture prices and builds a machine learning model to predict product prices using the IKEA dataset.
 
-The solution combines data analysis, statistical validation, and a production-ready ML pipeline exposed via an API.
+End-to-end machine learning project that predicts furniture prices based on product features.
 
+**The project covers:**
+
+- End-to-end ML pipeline from data analysis to deployment
+- Reproducible infrastructure using Terraform
+- Containerized API with Docker
+- Reverse proxy setup using Nginx
+- HTTPS secured with Let's Encrypt
+- Public deployment accessible via custom domain
+
+## Live Access
+API is publicly available via a custom domain with HTTPS enabled:
+[https://annastr.com/docs](https://annastr.com/docs)
+
+## Architecture
+The trained ML pipeline is served via a FastAPI application running inside a Docker container.
+
+Infrastructure is provisioned using Terraform on AWS EC2. Nginx is used as a reverse proxy, and HTTPS is enabled using Certbot.
+
+The API returns a predicted price based on input features using the trained pipeline.
+```
+User → Domain → nginx → FastAPI (Docker) → ML model
+```
+#### ML Model Details
+- **Features:** dimensions, category, color availability
+- **Feature engineering:** volume calculation
+- **Pipeline:** preprocessing + model
+- **Output:** predicted price in EUR
 
 ## Project Structure
 
@@ -13,8 +40,12 @@ The solution combines data analysis, statistical validation, and a production-re
 - `app.py` — FastAPI application for serving predictions
 - `model.pkl` — trained model pipeline
 - `data/ikea.csv` — dataset
+- `Dockerfile`
+- `terraform/` - infrastructure (AWS EC2, security groups)
+  - `main.tf` — infrastructure definition
+  - `user_data.sh` — EC2 initialization script (Docker install, API container run, Nginx install and configuration, certbot install)
 
-## How to Run
+## Local Run
 
 Install dependencies:
 ```bash
@@ -28,8 +59,45 @@ Open interactive docs:
 ```
 http://127.0.0.1:8000/docs
 ```
+## Deployment
 
-## Key Objective
+The infrastructure is provisioned on AWS EC2 using Terraform.
+
+Deployment steps:
+- Infrastructure provisioning with Terraform
+- Docker container runs FastAPI application
+- Nginx configured as reverse proxy
+- Domain connected via Route 53
+- HTTPS enabled using Certbot
+
+The setup is fully reproducible and can be recreated with:
+
+```bash
+terraform apply
+```
+Due to the use of a dynamic public IP (no Elastic IP), DNS configuration and SSL issuance are performed manually after deployment.
+## API Example
+```json
+POST /predict
+
+{
+  "depth": 50,
+  "width": 80,
+  "height": 40,
+  "category": "Sofas & armchairs",
+  "other_colors": 1
+}
+```
+Response:
+```json
+{
+  "predicted_price_eur": 70.46,
+  "currency": "EUR (€)",
+  "units": "cm"
+}
+```
+# ML Model Description
+
 The goal is to understand what drives furniture pricing and build a model capable of estimating product prices based on product characteristics.
 
 ## Data Preparation
@@ -70,23 +138,6 @@ All transformations are encapsulated in a single Pipeline, ensuring consistency 
 - Category plays a significant role in pricing
 - Products with multiple colors show statistically different price distribution
 
-## API
-
-The trained pipeline was saved and exposed via a FastAPI endpoint, allowing real-time price prediction based on user input.
-
-The API returns predicted price based on the trained pipeline.
-
-This setup demonstrates how the model can be integrated into a real-world application.
-
-Run API:
-```bash
-uvicorn app:app --reload
-```
-Open interactive docs:
-```
-http://127.0.0.1:8000/docs
-```
-
 ## Tech Stack
 - Python
 - Pandas, NumPy
@@ -94,3 +145,7 @@ http://127.0.0.1:8000/docs
 - Scikit-learn
 - SciPy
 - FastAPI
+- Docker
+- Terraform, AWS EC2, Route 53
+- Nginx
+- Certbot
