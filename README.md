@@ -16,7 +16,7 @@ End-to-end machine learning project that predicts furniture prices based on prod
 - Public deployment accessible via custom domain
 
 ## Live Access
-API is publicly available via a custom domain with HTTPS enabled:
+[Temporarily Deactivated] API is publicly available via a custom domain with HTTPS enabled:
 [https://annastr.com/docs](https://annastr.com/docs)
 
 ## Architecture
